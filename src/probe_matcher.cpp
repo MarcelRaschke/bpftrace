@@ -123,15 +123,19 @@ std::set<std::string> ProbeMatcher::get_matches_for_probetype(
         }
         return symbols::BinaryFuncMap();
       }();
-      // Expand to the full set of possible matching paths.
-      auto paths = util::resolve_binary_path(target,
-                                             bpftrace_->pid(),
-                                             bpftrace_->safe_mode_);
-      for (const auto& path : paths) {
-        auto ok = user_func_info_.func_symbols_for_path(path);
-        if (ok) {
-          for (const auto& sym : *ok) {
-            result[path].insert(sym);
+      // Expand to the full set of possible matching paths, unless a pid is
+      // given with -p and target is '*'. In that case, we already have
+      // the full set of symbols.
+      if (!bpftrace_->pid() || target != "*") {
+        auto paths = util::resolve_binary_path(target,
+                                               bpftrace_->pid(),
+                                               bpftrace_->safe_mode_);
+        for (const auto& path : paths) {
+          auto ok = user_func_info_.func_symbols_for_path(path);
+          if (ok) {
+            for (const auto& sym : *ok) {
+              result[path].insert(sym);
+            }
           }
         }
       }

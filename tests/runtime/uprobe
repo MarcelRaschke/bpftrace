@@ -30,6 +30,10 @@ BEFORE ./testprogs/uprobe_test
 NAME uprobes - list probes by pid; uprobes only
 RUN {{BPFTRACE}} -l 'uprobe:*' -p {{BEFORE_PID}}
 EXPECT_REGEX uprobe:.*/testprogs/uprobe_test:uprobeFunction1
+# Ensure that no probes from other binaries are listed. If bpftrace_test is
+# listed, unwanted globbing took place. bpftrace_test sits in the runtime
+# test runner's cwd (build/tests/).
+EXPECT_REGEX_NONE ^uprobe:bpftrace_test:
 BEFORE ./testprogs/uprobe_test
 
 NAME uprobes - list probes by pid in separate mount namespace
